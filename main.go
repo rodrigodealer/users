@@ -1,42 +1,35 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"time"
+	"os"
 
-	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/mux"
+	"github.com/rodrigodealer/realtime/tracing"
+	"github.com/rodrigodealer/users/handlers"
+	"github.com/rodrigodealer/users/mysql"
+	"github.com/rodrigodealer/users/redis"
 )
 
 func main() {
-	var client, err = redis.Dial("tcp", ":6379")
 
+	log.SetOutput(os.Stdout)
+	tracing.StartTracing("localhost:8080", "users")
+	log.Print("Starting server on port 8080")
+	err := http.ListenAndServe(":8080", Server())
 	if err != nil {
-		log.Printf("Redis error: %s", err.Error())
+		log.Panic("Something is wrong : " + err.Error())
 	}
-
-	var ping, _ = client.Do("PING")
-	log.Print(ping)
-
-	r := mux.NewRouter()
-	r.HandleFunc("/", HomeHandler)
-	http.Handle("/", r)
-
-	srv := &http.Server{
-		Handler: r,
-		Addr:    ":8080",
-		// Good practice: enforce timeouts for servers you create!
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-
-	log.Fatal(srv.ListenAndServe())
 }
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Category: %v\n", vars["category"])
+func Server() http.Handler {
+	redis := &redis.RedisConnection{}
+	redis.Connect()
+	mysql := &mysql.MySQLConnection{}
+	mysql.Connect()
+
+	r := mux.NewRouter()
+	r.HandleFunc("/healthcheck", handlers.HealthcheckHandler(redis, mysql)).Name("/healthcheck").Methods("GET")
+	return r
 }
