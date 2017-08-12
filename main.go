@@ -6,10 +6,20 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/mux"
 )
 
 func main() {
+	var client, err = redis.Dial("tcp", ":6379")
+
+	if err != nil {
+		log.Printf("Redis error: %s", err.Error())
+	}
+
+	var ping, _ = client.Do("PING")
+	log.Print(ping)
+
 	r := mux.NewRouter()
 	r.HandleFunc("/", HomeHandler)
 	http.Handle("/", r)
