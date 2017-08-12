@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/rodrigodealer/realtime/tracing"
 	"github.com/rodrigodealer/users/handlers"
 	"github.com/rodrigodealer/users/mysql"
 	"github.com/rodrigodealer/users/redis"
@@ -15,7 +14,6 @@ import (
 func main() {
 
 	log.SetOutput(os.Stdout)
-	tracing.StartTracing("localhost:8080", "users")
 	log.Print("Starting server on port 8080")
 	err := http.ListenAndServe(":8080", Server())
 	if err != nil {
