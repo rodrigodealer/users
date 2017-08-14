@@ -1,3 +1,6 @@
+key
+"{\"user_id\":3391,\"nutritionist_id\":1892,\"iugu_code\":\"696EA55376EA4DF0B9306006A2D0BB09\",\"in_trial\":true,\"trial_expires\":\"2016-12-09\"}"
+
 error
 {"status":"ERROR","message":"Token expired or invalid"}
 
