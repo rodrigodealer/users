@@ -13,6 +13,11 @@ func (o redisMock) Ping() (bool, error) {
 	return args.Bool(0), nil
 }
 
+func (o redisMock) Get(key string) string {
+	args := o.Called()
+	return args.String(0)
+}
+
 func (o redisMock) Connect() {
 }
 
