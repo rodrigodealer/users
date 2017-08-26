@@ -9,13 +9,13 @@ import (
 )
 
 type HealthcheckServiceStatus struct {
-	Working bool
-	Service string
+	Working bool   `json:"working"`
+	Service string `json:"service"`
 }
 
 type HealthcheckStatus struct {
-	Status   string
-	Services []*HealthcheckServiceStatus
+	Status   string                      `json:"status"`
+	Services []*HealthcheckServiceStatus `json:"services"`
 }
 
 func HealthcheckHandler(redis redis.RedisConn, mysql mysql.MySQLConn) func(w http.ResponseWriter, r *http.Request) {

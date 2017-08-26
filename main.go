@@ -29,5 +29,6 @@ func Server() http.Handler {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/healthcheck", handlers.HealthcheckHandler(redis, mysql)).Name("/healthcheck").Methods("GET")
+	r.HandleFunc("/users/token", handlers.TokenHandler(redis, mysql)).Name("/users/token").Methods("GET")
 	return r
 }

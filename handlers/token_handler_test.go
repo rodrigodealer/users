@@ -8,18 +8,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSuccessfulToken(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/healthcheck", nil)
+func TestUnauthorizedToken(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/users/token", nil)
 	res := httptest.NewRecorder()
 	redisClient := new(redisMock)
 	mysqlClient := new(mysqlMock)
 
-	redisClient.On("Ping").Return(true, nil)
-	mysqlClient.On("Ping").Return(true, nil)
+	handler := http.HandlerFunc(TokenHandler(redisClient, mysqlClient))
+	handler.ServeHTTP(res, req)
 
-	handler := http.HandlerFunc(HealthcheckHandler(redisClient, mysqlClient))
+	assert.Equal(t, res.Code, 401)
+	assert.Equal(t, res.Body.String(), "{\"status\":\"ERROR\",\"message\":\"Token expired or invalid\"}\n")
+}
+
+func TestSuccessfulToken(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/users/token?token=val", nil)
+	res := httptest.NewRecorder()
+	redisClient := new(redisMock)
+	mysqlClient := new(mysqlMock)
+
+	handler := http.HandlerFunc(TokenHandler(redisClient, mysqlClient))
 	handler.ServeHTTP(res, req)
 
 	assert.Equal(t, res.Code, 200)
-	assert.Equal(t, res.Body.String(), "{\"Status\":\"WORKING\",\"Services\":[{\"Working\":true,\"Service\":\"Redis\"},{\"Working\":true,\"Service\":\"MySQL\"}]}\n")
+	assert.Equal(t, res.Body.String(), "")
 }

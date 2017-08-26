@@ -21,7 +21,7 @@ func TestSuccessfulHealthcheck(t *testing.T) {
 	handler.ServeHTTP(res, req)
 
 	assert.Equal(t, res.Code, 200)
-	assert.Equal(t, res.Body.String(), "{\"Status\":\"WORKING\",\"Services\":[{\"Working\":true,\"Service\":\"Redis\"},{\"Working\":true,\"Service\":\"MySQL\"}]}\n")
+	assert.Equal(t, res.Body.String(), "{\"status\":\"WORKING\",\"services\":[{\"working\":true,\"service\":\"Redis\"},{\"working\":true,\"service\":\"MySQL\"}]}\n")
 }
 
 func TestFailedHealthcheck(t *testing.T) {
@@ -37,5 +37,5 @@ func TestFailedHealthcheck(t *testing.T) {
 	handler.ServeHTTP(res, req)
 
 	assert.Equal(t, res.Code, 500)
-	assert.Equal(t, res.Body.String(), "{\"Status\":\"FAILED\",\"Services\":[{\"Working\":false,\"Service\":\"Redis\"},{\"Working\":false,\"Service\":\"MySQL\"}]}\n")
+	assert.Equal(t, res.Body.String(), "{\"status\":\"FAILED\",\"services\":[{\"working\":false,\"service\":\"Redis\"},{\"working\":false,\"service\":\"MySQL\"}]}\n")
 }
