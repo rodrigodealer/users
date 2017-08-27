@@ -15,19 +15,24 @@ func TokenHandler(redis redis.RedisConn, mysql mysql.MySQLConn) func(w http.Resp
 		if !isTokenPresent {
 			tokenNotPresent(w)
 		} else {
-			var key = redis.Get(token[0])
-			if key == "" {
-				var dbToken, err = mysql.GetToken(token[0])
-				if err != nil {
-					w.WriteHeader(http.StatusNotFound)
-				} else {
-					key = dbToken
-					redis.SetXX(token[0], dbToken)
-				}
-			}
-			json.NewEncoder(w).Encode(key)
+			tokenFromMySQL(w, token[0], redis, mysql)
 		}
 	}
+}
+
+func tokenFromMySQL(w http.ResponseWriter, token string,
+	redis redis.RedisConn, mysql mysql.MySQLConn) {
+	key := redis.Get(token)
+	if key == "" {
+		var dbToken, err = mysql.GetToken(token)
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			key = dbToken
+			redis.SetXX(token, dbToken)
+		}
+	}
+	json.NewEncoder(w).Encode(key)
 }
 
 func tokenNotPresent(w http.ResponseWriter) {
