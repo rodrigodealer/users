@@ -30,5 +30,10 @@ func (o mysqlMock) Ping() (bool, error) {
 	return args.Bool(0), nil
 }
 
+func (o mysqlMock) GetToken(token string) (string, error) {
+	args := o.Called()
+	return args.String(0), nil
+}
+
 func (o mysqlMock) Connect() {
 }

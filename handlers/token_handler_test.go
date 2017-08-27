@@ -21,15 +21,30 @@ func TestUnauthorizedToken(t *testing.T) {
 	assert.Equal(t, res.Body.String(), "{\"status\":\"ERROR\",\"message\":\"Token expired or invalid\"}\n")
 }
 
-func TestSuccessfulToken(t *testing.T) {
+func TestSuccessfulTokenFromRedis(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/users/token?token=val", nil)
 	res := httptest.NewRecorder()
 	redisClient := new(redisMock)
 	mysqlClient := new(mysqlMock)
+	redisClient.On("Get").Return("bla", nil)
 
 	handler := http.HandlerFunc(TokenHandler(redisClient, mysqlClient))
 	handler.ServeHTTP(res, req)
 
 	assert.Equal(t, res.Code, 200)
-	assert.Equal(t, res.Body.String(), "")
+	assert.Equal(t, res.Body.String(), "\"bla\"\n")
+}
+
+func TestSuccessfulTokenFromMySQL(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/users/token?token=val", nil)
+	res := httptest.NewRecorder()
+	redisClient := new(redisMock)
+	mysqlClient := new(mysqlMock)
+	redisClient.On("Get").Return("", nil)
+
+	handler := http.HandlerFunc(TokenHandler(redisClient, mysqlClient))
+	handler.ServeHTTP(res, req)
+
+	assert.Equal(t, res.Code, 200)
+	assert.Equal(t, res.Body.String(), "\"bla\"\n")
 }

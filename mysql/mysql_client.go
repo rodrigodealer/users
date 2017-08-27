@@ -10,6 +10,7 @@ import (
 type MySQLConn interface {
 	Connect()
 	Ping() (bool, error)
+	GetToken(token string) (string, error)
 }
 
 type MySQLConnection struct {
@@ -23,6 +24,12 @@ func (m *MySQLConnection) Connect() {
 		log.Printf("Failed to connect to MySQL: (%s)\n %s", connectionString, err.Error())
 	}
 	m.Conn = db
+}
+
+func (m *MySQLConnection) GetToken(token string) (string, error) {
+	var dbToken string
+	err := m.Conn.QueryRow("SELECT token FROM auth_tokens WHERE token=?", token).Scan(&dbToken)
+	return dbToken, err
 }
 
 func (m *MySQLConnection) Ping() (bool, error) {
