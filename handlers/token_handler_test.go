@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -41,10 +42,26 @@ func TestSuccessfulTokenFromMySQL(t *testing.T) {
 	redisClient := new(redisMock)
 	mysqlClient := new(mysqlMock)
 	redisClient.On("Get").Return("", nil)
+	mysqlClient.On("GetToken").Return("myval", nil)
 
 	handler := http.HandlerFunc(TokenHandler(redisClient, mysqlClient))
 	handler.ServeHTTP(res, req)
 
 	assert.Equal(t, res.Code, 200)
-	assert.Equal(t, res.Body.String(), "\"bla\"\n")
+	assert.Equal(t, res.Body.String(), "\"myval\"\n")
+}
+
+func TestUnsuccessfulTokenFromMySQL(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/users/token?token=val", nil)
+	res := httptest.NewRecorder()
+	redisClient := new(redisMock)
+	mysqlClient := new(mysqlMock)
+	redisClient.On("Get").Return("", nil)
+	mysqlClient.On("GetToken").Return("", errors.New("bla"))
+
+	handler := http.HandlerFunc(TokenHandler(redisClient, mysqlClient))
+	handler.ServeHTTP(res, req)
+
+	assert.Equal(t, res.Code, 404)
+	assert.Equal(t, res.Body.String(), "")
 }

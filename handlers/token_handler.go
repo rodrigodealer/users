@@ -20,15 +20,17 @@ func TokenHandler(redis redis.RedisConn, mysql mysql.MySQLConn) func(w http.Resp
 			if key != "" {
 				json.NewEncoder(w).Encode(key)
 			} else {
-				dbToken, err := mysql.GetToken(token[0])
+				key, err := mysql.GetToken(token[0])
 				if err != nil {
-					log.Printf("Error fetch token %s from MySQL: %s", token[0], err.Error())
+					log.Printf("Error fetching token %s from MySQL: %s", token[0], err.Error())
 					w.WriteHeader(http.StatusNotFound)
 				} else {
-					log.Printf("Found token: %s", dbToken)
+					log.Printf("Found token %s in MySQL", token[0])
+					redis.SetXX(token[0], key)
+					json.NewEncoder(w).Encode(key)
 				}
 			}
-			w.WriteHeader(http.StatusOK)
+			// w.WriteHeader(http.StatusOK)
 		}
 	}
 }
