@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/rodrigodealer/users/mysql"
@@ -17,20 +16,16 @@ func TokenHandler(redis redis.RedisConn, mysql mysql.MySQLConn) func(w http.Resp
 			tokenNotPresent(w)
 		} else {
 			var key = redis.Get(token[0])
-			if key != "" {
-				json.NewEncoder(w).Encode(key)
-			} else {
-				key, err := mysql.GetToken(token[0])
+			if key == "" {
+				var dbToken, err = mysql.GetToken(token[0])
 				if err != nil {
-					log.Printf("Error fetching token %s from MySQL: %s", token[0], err.Error())
 					w.WriteHeader(http.StatusNotFound)
 				} else {
-					log.Printf("Found token %s in MySQL", token[0])
-					redis.SetXX(token[0], key)
-					json.NewEncoder(w).Encode(key)
+					key = dbToken
+					redis.SetXX(token[0], dbToken)
 				}
 			}
-			// w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(key)
 		}
 	}
 }

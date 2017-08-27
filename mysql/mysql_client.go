@@ -29,6 +29,11 @@ func (m *MySQLConnection) Connect() {
 func (m *MySQLConnection) GetToken(token string) (string, error) {
 	var dbToken string
 	err := m.Conn.QueryRow("SELECT token FROM auth_tokens WHERE token=?", token).Scan(&dbToken)
+	if err != nil {
+		log.Printf("Error fetching token %s from MySQL: %s", token, err.Error())
+	} else {
+		log.Printf("Found token %s in MySQL", token)
+	}
 	return dbToken, err
 }
 

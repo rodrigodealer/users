@@ -32,8 +32,8 @@ func TestSuccessfulTokenFromRedis(t *testing.T) {
 	handler := http.HandlerFunc(TokenHandler(redisClient, mysqlClient))
 	handler.ServeHTTP(res, req)
 
-	assert.Equal(t, res.Code, 200)
-	assert.Equal(t, res.Body.String(), "\"bla\"\n")
+	assert.Equal(t, 200, res.Code)
+	assert.Equal(t, "\"bla\"\n", res.Body.String())
 }
 
 func TestSuccessfulTokenFromMySQL(t *testing.T) {
@@ -47,8 +47,8 @@ func TestSuccessfulTokenFromMySQL(t *testing.T) {
 	handler := http.HandlerFunc(TokenHandler(redisClient, mysqlClient))
 	handler.ServeHTTP(res, req)
 
-	assert.Equal(t, res.Code, 200)
-	assert.Equal(t, res.Body.String(), "\"myval\"\n")
+	assert.Equal(t, 200, res.Code)
+	assert.Equal(t, "\"myval\"\n", res.Body.String())
 }
 
 func TestUnsuccessfulTokenFromMySQL(t *testing.T) {
@@ -63,5 +63,5 @@ func TestUnsuccessfulTokenFromMySQL(t *testing.T) {
 	handler.ServeHTTP(res, req)
 
 	assert.Equal(t, res.Code, 404)
-	assert.Equal(t, res.Body.String(), "")
+	assert.Equal(t, "\"\"\n", res.Body.String())
 }
