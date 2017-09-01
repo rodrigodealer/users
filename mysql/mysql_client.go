@@ -23,6 +23,8 @@ func (m *MySQLConnection) Connect() {
 	if err != nil {
 		log.Printf("Failed to connect to MySQL: (%s)\n %s", connectionString, err.Error())
 	}
+	db.SetMaxIdleConns(70)
+	db.SetMaxOpenConns(100)
 	m.Conn = db
 }
 

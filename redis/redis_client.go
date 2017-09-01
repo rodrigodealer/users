@@ -2,6 +2,7 @@ package redis
 
 import (
 	"log"
+	"time"
 
 	"github.com/garyburd/redigo/redis"
 )
@@ -18,7 +19,7 @@ type RedisConn interface {
 }
 
 func (r *RedisConnection) Connect() {
-	var client, err = redis.Dial("tcp", ":6379")
+	var client, err = redis.Dial("tcp", "127.0.0.1:6379")
 
 	if err != nil {
 		log.Printf("Redis error: %s", err.Error())
@@ -26,11 +27,33 @@ func (r *RedisConnection) Connect() {
 	r.Conn = client
 }
 
+func (r *RedisConnection) getPool() *redis.Pool {
+	pool := &redis.Pool{
+		MaxIdle:     50,              // Maximum number of idle connections in the pool.
+		MaxActive:   100,             // Maximum number of connections allocated by the pool at a given time.
+		IdleTimeout: 2 * time.Second, // Close connections after remaining idle for this duration. Applications should set the timeout to a value less than the server's timeout.
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", "127.0.0.1:6379")
+			if err != nil {
+				return nil, err
+			}
+			return c, err
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			return err
+		},
+	}
+	return pool
+}
+
 func (r *RedisConnection) Get(key string) string {
-	var result, err = redis.String(r.Conn.Do("GET", key))
+	var pool = r.getPool().Get()
+	var result, err = redis.String(r.getPool().Get().Do("GET", key))
 	if err != nil {
 		log.Printf("Error trying to get key: %s\n %s", key, err.Error())
 	}
+	defer pool.Close()
 	return result
 }
 
