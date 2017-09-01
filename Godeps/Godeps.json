@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/rodrigodealer/users",
-	"GoVersion": "go1.8",
+	"GoVersion": "go1.9",
 	"GodepVersion": "v79",
 	"Packages": [
 		"./..."
@@ -20,6 +20,36 @@
 			"ImportPath": "github.com/garyburd/redigo/redis",
 			"Comment": "v1.1.0-8-g9e66b83",
 			"Rev": "9e66b83d15a259978be267d0b61838c42c3904e3"
+		},
+		{
+			"ImportPath": "github.com/go-redis/redis",
+			"Comment": "v6.6.0",
+			"Rev": "74d5147d860804ea34633071d0c91a7f4b0b5c3a"
+		},
+		{
+			"ImportPath": "github.com/go-redis/redis/internal",
+			"Comment": "v6.6.0",
+			"Rev": "74d5147d860804ea34633071d0c91a7f4b0b5c3a"
+		},
+		{
+			"ImportPath": "github.com/go-redis/redis/internal/consistenthash",
+			"Comment": "v6.6.0",
+			"Rev": "74d5147d860804ea34633071d0c91a7f4b0b5c3a"
+		},
+		{
+			"ImportPath": "github.com/go-redis/redis/internal/hashtag",
+			"Comment": "v6.6.0",
+			"Rev": "74d5147d860804ea34633071d0c91a7f4b0b5c3a"
+		},
+		{
+			"ImportPath": "github.com/go-redis/redis/internal/pool",
+			"Comment": "v6.6.0",
+			"Rev": "74d5147d860804ea34633071d0c91a7f4b0b5c3a"
+		},
+		{
+			"ImportPath": "github.com/go-redis/redis/internal/proto",
+			"Comment": "v6.6.0",
+			"Rev": "74d5147d860804ea34633071d0c91a7f4b0b5c3a"
 		},
 		{
 			"ImportPath": "github.com/go-sql-driver/mysql",

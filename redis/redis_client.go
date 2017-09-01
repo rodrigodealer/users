@@ -4,11 +4,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/go-redis/redis"
 )
 
 type RedisConnection struct {
-	Conn redis.Conn
+	Conn *redis.Client
 }
 
 type RedisConn interface {
@@ -19,47 +19,32 @@ type RedisConn interface {
 }
 
 func (r *RedisConnection) Connect() {
-	var client, err = redis.Dial("tcp", "127.0.0.1:6379")
-
-	if err != nil {
-		log.Printf("Redis error: %s", err.Error())
-	}
-	r.Conn = client
+	r.Conn = r.getPool()
 }
 
-func (r *RedisConnection) getPool() *redis.Pool {
-	pool := &redis.Pool{
-		MaxIdle:     50,              // Maximum number of idle connections in the pool.
-		MaxActive:   100,             // Maximum number of connections allocated by the pool at a given time.
-		IdleTimeout: 2 * time.Second, // Close connections after remaining idle for this duration. Applications should set the timeout to a value less than the server's timeout.
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", "127.0.0.1:6379")
-			if err != nil {
-				return nil, err
-			}
-			return c, err
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
-			return err
-		},
-	}
-	return pool
+func (r *RedisConnection) getPool() *redis.Client {
+	client := redis.NewClient(&redis.Options{
+		Addr:        ":6379",
+		PoolSize:    3000,
+		PoolTimeout: 1,
+		Password:    "",
+		DB:          0,
+	})
+
+	return client
 }
 
 func (r *RedisConnection) Get(key string) string {
-	var pool = r.getPool().Get()
-	var result, err = redis.String(r.getPool().Get().Do("GET", key))
+	var result, err = r.Conn.Get(key).Result()
 	if err != nil {
 		log.Printf("Error trying to get key: %s\n %s", key, err.Error())
 	}
-	defer pool.Close()
 	return result
 }
 
 func (r *RedisConnection) SetXX(key string, value string) {
 	const ttl = 120
-	var _, err = r.Conn.Do("SETEX", key, ttl, value)
+	var _, err = r.Conn.SetNX(key, value, ttl*time.Second).Result()
 	if err != nil {
 		log.Printf("Error trying to set key: %s\n %s", key, err.Error())
 	} else {
@@ -70,7 +55,7 @@ func (r *RedisConnection) SetXX(key string, value string) {
 func (r *RedisConnection) Ping() (bool, error) {
 	var redisWorking = false
 	if r.Conn != nil {
-		var _, err = r.Conn.Do("PING")
+		var _, err = r.Conn.Ping().Result()
 		if err != nil {
 			log.Printf("Error performing ping: %s", err.Error())
 		}

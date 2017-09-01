@@ -22,6 +22,7 @@ func TokenHandler(redis redis.RedisConn, mysql mysql.MySQLConn) func(w http.Resp
 
 func tokenFromMySQL(w http.ResponseWriter, token string,
 	redis redis.RedisConn, mysql mysql.MySQLConn) {
+	// var key = redis.Get("bla")
 	key := redis.Get(token)
 	if key == "" {
 		var dbToken, err = mysql.GetToken(token)
